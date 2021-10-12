@@ -1,7 +1,11 @@
-﻿namespace CasaDoCodigo
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+
+namespace CasaDoCodigo
 {
-    interface IDataService
+    public interface IDataService
     {
-        void InicializaDB();
+        Task InicializaDBAsync(IServiceProvider provider);
     }
 }

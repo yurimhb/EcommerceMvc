@@ -15,7 +15,7 @@ A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\bin\Debug\netcoreapp2.0\ECommerceMVC.p
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.csprojAssemblyReference.cache
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.AssemblyInfoInputs.cache
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.AssemblyInfo.cs
-A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.csproj.CoreCompileInputs.cache
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.dll
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.pdb
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.genruntimeconfig.cache
+A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.0\ECommerceMVC.csproj.CoreCompileInputs.cache

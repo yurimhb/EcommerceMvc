@@ -2,96 +2,113 @@
 using CasaDoCodigo.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CasaDoCodigo.Repositories
 {
+    //MELHORIA: 6) Repositórios simplificados
     public interface IPedidoRepository
     {
-        Pedido GetPedido();
-        void AddItem(string codigo);
-        UpdateQuantidadeResponse UpdateQuantidade(ItemPedido itemPedido);
-        Pedido UpdateCadastro(Cadastro cadastro);
+        Task<Pedido> GetPedidoAsync();
+        Task AddItemAsync(string codigo);
+        Task<UpdateQuantidadeResponse> UpdateQuantidadeAsync(ItemPedido itemPedido);
+        Task<Pedido> UpdateCadastroAsync(Cadastro cadastro);
     }
 
     public class PedidoRepository : BaseRepository<Pedido>, IPedidoRepository
     {
         private readonly IHttpContextAccessor contextAccessor;
-        private readonly IItemPedidoRepository itemPedidoRepository;
+        private readonly IHttpHelper httpHelper;
         private readonly ICadastroRepository cadastroRepository;
 
-        public PedidoRepository(ApplicationContext contexto, IHttpContextAccessor contextAccessor, IItemPedidoRepository itemPedidoRepository, ICadastroRepository cadastroRepository) : base(contexto)
+        public PedidoRepository(IConfiguration configuration,
+            ApplicationContext contexto,
+            IHttpContextAccessor contextAccessor,
+            IHttpHelper sessionHelper,
+            ICadastroRepository cadastroRepository) : base(configuration, contexto)
         {
             this.contextAccessor = contextAccessor;
-            this.itemPedidoRepository = itemPedidoRepository;
+            this.httpHelper = sessionHelper;
             this.cadastroRepository = cadastroRepository;
         }
 
-        public void AddItem(string codigo)
+        public async Task AddItemAsync(string codigo)
         {
-            var produto = contexto.Set<Produto>().Where(x => x.Codigo == codigo).SingleOrDefault();
+            var produto = await
+                            contexto.Set<Produto>()
+                            .Where(p => p.Codigo == codigo)
+                            .SingleOrDefaultAsync();
+
             if (produto == null)
             {
                 throw new ArgumentException("Produto não encontrado");
             }
 
-            var pedido = GetPedido();
-            var itemPedido = contexto.Set<ItemPedido>().Where(x => x.Produto.Codigo == codigo && x.Pedido.Id == pedido.Id).SingleOrDefault();
+            var pedido = await GetPedidoAsync();
+
+            var itemPedido = await
+                                contexto.Set<ItemPedido>()
+                                .Where(i => i.Produto.Codigo == codigo
+                                        && i.Pedido.Id == pedido.Id)
+                                .SingleOrDefaultAsync();
 
             if (itemPedido == null)
             {
                 itemPedido = new ItemPedido(pedido, produto, 1, produto.Preco);
-                contexto.Set<ItemPedido>().Add(itemPedido);
+                await
+                    contexto.Set<ItemPedido>()
+                    .AddAsync(itemPedido);
 
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
             }
-
         }
 
-        public Pedido GetPedido()
+        public async Task<Pedido> GetPedidoAsync()
         {
-            var pedidoId = GetPedidoId();
-            var pedido = dbSets
-                .Include(p=> p.Itens)
-                .ThenInclude(i=>i.Produto)
+            var pedidoId = httpHelper.GetPedidoId();
+            var pedido =
+                await dbSet
+                .Include(p => p.Itens)
+                    .ThenInclude(i => i.Produto)
+                        .ThenInclude(prod => prod.Categoria)
                 .Include(p => p.Cadastro)
-                .Where(x => x.Id == pedidoId).SingleOrDefault();
+                .Where(p => p.Id == pedidoId)
+                .SingleOrDefaultAsync();
 
             if (pedido == null)
             {
-                pedido = new Pedido();
-                dbSets.Add(pedido);
-                contexto.SaveChanges();
-                SetPedidoId(pedido.Id);
+                pedido = new Pedido(httpHelper.GetCadastro());
+                await dbSet.AddAsync(pedido);
+                await contexto.SaveChangesAsync();
+                httpHelper.SetPedidoId(pedido.Id);
             }
 
             return pedido;
         }
 
-        public Pedido UpdateCadastro(Cadastro cadastro)
+        public async Task<UpdateQuantidadeResponse> UpdateQuantidadeAsync(ItemPedido itemPedido)
         {
-            var pedido = GetPedido();
-            cadastroRepository.Update(pedido.Cadastro.Id, cadastro);
-            return pedido;
-        }
+            var itemPedidoDB = await GetItemPedidoAsync(itemPedido.Id);
 
-        public UpdateQuantidadeResponse UpdateQuantidade(ItemPedido itemPedido)
-        {
-            var itemPedidoDB = itemPedidoRepository.getItemPedido(itemPedido.Id);
-
-            if (itemPedido != null)
+            if (itemPedidoDB != null)
             {
                 itemPedidoDB.AtualizaQuantidade(itemPedido.Quantidade);
 
                 if (itemPedido.Quantidade == 0)
-                    itemPedidoRepository.removeItemPedido(itemPedido.Id);
+                {
+                    await RemoveItemPedidoAsync(itemPedido.Id);
+                }
 
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
-                CarrinhoViewModel carrinhoViewModel = new CarrinhoViewModel(GetPedido().Itens);
+                var pedido = await GetPedidoAsync();
+                var carrinhoViewModel = new CarrinhoViewModel(pedido.Itens);
 
                 return new UpdateQuantidadeResponse(itemPedidoDB, carrinhoViewModel);
             }
@@ -99,14 +116,27 @@ namespace CasaDoCodigo.Repositories
             throw new ArgumentException("ItemPedido não encontrado");
         }
 
-        private int? GetPedidoId()
+        public async Task<Pedido> UpdateCadastroAsync(Cadastro cadastro)
         {
-            return contextAccessor.HttpContext.Session.GetInt32("pedidoId");
+            var pedido = await GetPedidoAsync();
+            await cadastroRepository.UpdateAsync(pedido.Cadastro.Id, cadastro);
+            httpHelper.ResetPedidoId();
+            httpHelper.SetCadastro(pedido.Cadastro);
+            return pedido;
         }
 
-        private void SetPedidoId(int pedidoId)
+        private async Task<ItemPedido> GetItemPedidoAsync(int itemPedidoId)
         {
-            contextAccessor.HttpContext.Session.SetInt32("pedidoId", pedidoId);
+            return
+            await contexto.Set<ItemPedido>()
+                .Where(ip => ip.Id == itemPedidoId)
+                .SingleOrDefaultAsync();
+        }
+
+        private async Task RemoveItemPedidoAsync(int itemPedidoId)
+        {
+            contexto.Set<ItemPedido>()
+                .Remove(await GetItemPedidoAsync(itemPedidoId));
         }
     }
 }

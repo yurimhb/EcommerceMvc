@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CasaDoCodigo.Models;
+﻿using CasaDoCodigo.Models;
 using CasaDoCodigo.Models.ViewModels;
 using CasaDoCodigo.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CasaDoCodigo.Controllers
 {
@@ -13,57 +13,68 @@ namespace CasaDoCodigo.Controllers
     {
         private readonly IProdutoRepository produtoRepository;
         private readonly IPedidoRepository pedidoRepository;
-        private readonly IItemPedidoRepository itemPedidoRepository;
 
-        public PedidoController(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository, IItemPedidoRepository itemPedidoRepository)
+        public PedidoController(IProdutoRepository produtoRepository,
+            IPedidoRepository pedidoRepository)
         {
             this.produtoRepository = produtoRepository;
             this.pedidoRepository = pedidoRepository;
-            this.itemPedidoRepository = itemPedidoRepository;
         }
 
-        public IActionResult Carrossel()
+        public async Task<IActionResult> Carrossel()
         {
-            return View(produtoRepository.GetProdutos());
+            return View(await produtoRepository.GetProdutosAsync());
         }
 
-        public IActionResult Carrinho(string codigo)
+        //MELHORIA: 2) Nova view de Busca de Produtos
+        //Para saber mais: Formação .NET
+        //https://cursos.alura.com.br/formacao-dotnet
+        public async Task<IActionResult> BuscaProdutos(string pesquisa)
+        {
+            return View(await produtoRepository.GetProdutosAsync(pesquisa));
+        }
+
+        public async Task<IActionResult> Carrinho(string codigo)
         {
             if (!string.IsNullOrEmpty(codigo))
             {
-                pedidoRepository.AddItem(codigo);
+                await pedidoRepository.AddItemAsync(codigo);
             }
 
-            var itens = pedidoRepository.GetPedido().Itens;
-            var carrinhoVM = new CarrinhoViewModel(itens);
-            return View(carrinhoVM);
+            var pedido = await pedidoRepository.GetPedidoAsync();
+            List<ItemPedido> itens = pedido.Itens;
+            CarrinhoViewModel carrinhoViewModel = new CarrinhoViewModel(itens);
+            return base.View(carrinhoViewModel);
         }
 
-        public IActionResult Cadastro()
+        public async Task<IActionResult> Cadastro()
         {
-            var pedido = pedidoRepository.GetPedido();
+            var pedido = await pedidoRepository.GetPedidoAsync();
 
             if (pedido == null)
-                return RedirectToAction("Carrosel");
+            {
+                return RedirectToAction("Carrossel");
+            }
 
             return View(pedido.Cadastro);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Resumo(Cadastro cadastro)
+        public async Task<IActionResult> Resumo(Cadastro cadastro)
         {
             if (ModelState.IsValid)
-                return View(pedidoRepository.UpdateCadastro(cadastro));
+            {
+                return View(await pedidoRepository.UpdateCadastroAsync(cadastro));
+            }
             return RedirectToAction("Cadastro");
-
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public UpdateQuantidadeResponse UpdateQuantidade([FromBody] ItemPedido itemPedido)
+        public async Task<UpdateQuantidadeResponse> UpdateQuantidade([FromBody] ItemPedido itemPedido)
         {
-            return pedidoRepository.UpdateQuantidade(itemPedido);
+            return await pedidoRepository.UpdateQuantidadeAsync(itemPedido);
         }
     }
 }
