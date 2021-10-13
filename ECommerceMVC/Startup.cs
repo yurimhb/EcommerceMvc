@@ -66,6 +66,7 @@ namespace CasaDoCodigo
             }
 
             app.UseStaticFiles();
+            app.UseAuthentication();
             app.UseSession();
             app.UseMvc(routes =>
             {
