@@ -17,7 +17,6 @@ A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.c
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.dll
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.pdb
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.genruntimeconfig.cache
-A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.csproj.AssemblyReference.cache
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.GeneratedMSBuildEditorConfig.editorconfig
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\bin\Debug\netcoreapp2.2\ECommerceMVC.Views.dll
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\bin\Debug\netcoreapp2.2\ECommerceMVC.Views.pdb
@@ -52,3 +51,4 @@ A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\Razor\Areas\Id
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\Razor\Areas\Identity\Pages\_ViewStart.cshtml.g.cs
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\Razor\Views\Shared\_CookieConsentPartial.cshtml.g.cs
 A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\Razor\Views\Shared\_LoginPartial.cshtml.g.cs
+A:\Web\MVC Core\CasaDoCodigo\ECommerceMVC\obj\Debug\netcoreapp2.2\ECommerceMVC.csproj.AssemblyReference.cache

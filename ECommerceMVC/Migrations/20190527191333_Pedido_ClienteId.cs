@@ -2,7 +2,7 @@
 
 namespace CasaDoCodigo.Migrations
 {
-    public partial class Pedido_clientId : Migration
+    public partial class Pedido_ClienteId : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
