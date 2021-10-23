@@ -10,7 +10,7 @@
             <h2>Buscar produtos</h2>
             <div id="custom-search-input">
                 <div class="input-group col-md-12">
-                    <form asp-action="buscaprodutos">
+                    <form asp-area="catalogo">
                         <input type="text" asp-for="@Model.Pesquisa" name="pesquisa"
                                class="form-control input-lg"
                                placeholder="categoria ou produto" />
@@ -71,7 +71,7 @@
                                         <div class="produto-nome">@produto.Nome</div>
                                         <div><h4><strong>R$ @produto.Preco</strong></h4></div>
                                         <div class="text-center">
-                                            <a asp-action="carrinho"
+                                            <a asp-controller="pedido" asp-area="" asp-action="carrinho"
                                                asp-route-codigo="@produto.Codigo"
                                                class="btn btn-success">Adicionar</a>
                                         </div>
