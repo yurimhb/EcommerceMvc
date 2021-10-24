@@ -1,4 +1,5 @@
 ﻿using CasaDoCodigo.Repositories;
+using ECommerceMVC.Areas.Catalogo.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -35,9 +36,14 @@ namespace CasaDoCodigo
             services.AddSession();
 
             string connectionString = Configuration.GetConnectionString("Default");
+            string connectionStringCatalogo = Configuration.GetConnectionString("Catalogo");
 
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(connectionString)
+            );
+
+            services.AddDbContext<CatalogoDbContext>(options =>
+                options.UseSqlServer(connectionStringCatalogo)
             );
 
             services.AddTransient<IDataService, DataService>();
